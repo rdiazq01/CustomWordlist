@@ -48,3 +48,8 @@ El usuario debe ingresar información como:
 * Ciudad de residencia
 * Color favorito
 * Apodo o alias
+
+Posteriormente el programa nos preguntara que nombre queremos darle al archivo, cuando respondamos podremos visualizar con cat nuevo archivo txt.
+
+## Requisitos
+Para ejecutar CustomWordlist, solo necesitas tener Python 3 instalado.
