@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+import itertools
+import sys
+
+# 🎨 Dibujo ASCII
+ascii_art = """
+ ██████╗██╗   ██╗███████╗████████╗ ██████╗ ███╗   ███╗██╗    ██╗██╗     ██╗████████╗
+██╔════╝██║   ██║██╔════╝╚══██╔══╝██╔═══██╗████╗ ████║██║    ██║██║     ██║╚══██╔══╝
+██║     ██║   ██║███████╗   ██║   ██║   ██║██╔████╔██║██║ █╗ ██║██║     ██║   ██║   
+██║     ██║   ██║╚════██║   ██║   ██║   ██║██║╚██╔╝██║██║███╗██║██║     ██║   ██║   
+╚██████╗╚██████╔╝███████║   ██║   ╚██████╔╝██║ ╚═╝ ██║╚███╔███╔╝███████╗██║   ██║   
+ ╚═════╝ ╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝     ╚═╝ ╚══╝╚══╝ ╚══════╝╚═╝   ╚═╝  
+"""
+
+# 🛠 Función para pedir entrada con opción de salir
+def pedir_dato(mensaje):
+    dato = input(mensaje).strip()
+    if dato.lower() == "salir":
+        print("👋 Saliendo del programa... ¡Hasta la próxima!")
+        sys.exit(0)
+    return dato
+
+try:
+    # 📌 Mostrar el logo al iniciar
+    print(ascii_art)
+    print("🔐 CustomWordlist - Generador de Diccionarios de Contraseñas Personalizadas")
+    print(f"⚡ Modo: {'EXTENDIDO' if '--pro' in sys.argv else 'NORMAL'}\n")
+
+    # 🎤 Preguntar datos al usuario
+    nombre = pedir_dato("👤 Nombre de la persona: ")
+    apellido = pedir_dato("👤 Apellido: ")
+    fecha_nacimiento = pedir_dato("📆 Año de nacimiento (ej: 1995): ")
+    nombre_pareja = pedir_dato("💑 Nombre de la pareja (Enter para omitir): ")
+    fecha_nacimiento_pareja = pedir_dato("📆 Año de nacimiento de la pareja (Enter para omitir): ")
+    nombre_mascota = pedir_dato("🐶 Nombre de la mascota (Enter para omitir): ")
+    ciudad = pedir_dato("🏙 Ciudad donde vive: ")
+    color_favorito = pedir_dato("🎨 Color favorito: ")
+    apodo = pedir_dato("🔖 Apodo de la persona (Enter para omitir): ")
+
+    # 📋 Lista de palabras base (eliminando entradas vacías)
+    base_words = [nombre, apellido, fecha_nacimiento, nombre_pareja, fecha_nacimiento_pareja, 
+                  nombre_mascota, ciudad, color_favorito, apodo]
+    base_words = [word for word in base_words if word]  
+
+    # 🛠 Función para generar variaciones de contraseñas
+    def generate_passwords(base_words, extendido=False):
+        password_list = set()
+
+        # Define los caracteres especiales según el modo
+        special_chars = ["%", "&", "*", "_", "+"] if extendido else ["!", "@", "#", "$"]
+
+        for word in base_words:
+            for char in special_chars:
+                password_list.add(word + char)
+                password_list.add(char + word)
+
+        for word in base_words:
+            for number in ["123", "2024", "01", "99"]:
+                password_list.add(word + number)
+                password_list.add(number + word)
+
+        for combo in itertools.permutations(base_words, 2):
+            password_list.add("".join(combo))
+            password_list.add(combo[0] + "2024" + combo[1])
+
+        return list(password_list)
+
+    # 🔄 Generar lista de contraseñas
+    generated_passwords = generate_passwords(base_words, extendido="--extendido" in sys.argv)
+
+    # 📂 Preguntar el nombre del archivo antes de guardarlo
+    nombre_archivo = pedir_dato("\n📝 ¿Cómo quieres nombrar el archivo de salida? (sin extensión): ")
+    if not nombre_archivo:
+        nombre_archivo = "passwords"
+
+    # 📁 Guardar en el archivo elegido
+    output_file = f"{nombre_archivo}.txt"
+    with open(output_file, "w") as f:
+        for pwd in generated_passwords:
+            f.write(f"{pwd}\n")
+
+    # ✅ Mensaje final
+    print(f"\n✅ Diccionario generado con éxito. Se han creado {len(generated_passwords)} contraseñas.")
+    print(f"📂 Puedes revisarlo con: cat {output_file}")
+
+except KeyboardInterrupt:
+    print("\n❌ Interrupción por teclado detectada. Cerrando...")
+    sys.exit(0)
